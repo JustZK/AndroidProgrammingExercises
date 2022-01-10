@@ -21,7 +21,7 @@ import java.util.*
 
 class CrimeListFragment : Fragment() {
     private lateinit var crimeRecyclerView: RecyclerView
-    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
+    private var adapter = CrimeAdapter(emptyList())
     private var subtitleVisible = false
     private var callbacks: Callbacks? = null
 
@@ -34,11 +34,13 @@ class CrimeListFragment : Fragment() {
     }
 
     override fun onAttach(context: Context) {
+        Log.d(TAG, "------ onAttach")
         super.onAttach(context)
         callbacks = context as Callbacks
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "------ onCreate")
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
@@ -59,6 +61,7 @@ class CrimeListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d(TAG, "------ onCreateView")
         val view = inflater.inflate(R.layout.fragment_crime_list, container, false)
         crimeRecyclerView = view.findViewById(R.id.crime_recycler_view)
         crimeRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -72,19 +75,13 @@ class CrimeListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(TAG, "------ onViewCreated")
         super.onViewCreated(view, savedInstanceState)
-        crimeListViewModel.crimeListLiveData.observe(
-            viewLifecycleOwner,
-            { crimes ->
-                crimes?.let {
-                    Log.d(TAG, "Got crimes ${crimes.size}")
-                    updateUI(crimes)
-                }
-            }
-        )
+        updateUI()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        Log.d(TAG, "------ onCreateOptionsMenu")
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.frament_crime_list, menu)
 
@@ -98,12 +95,14 @@ class CrimeListFragment : Fragment() {
             R.id.new_crime -> {
                 val crime = Crime()
                 crimeListViewModel.addCrime(crime)
+                updateSubtitle(adapter.itemCount + 1)
                 callbacks?.onCrimeSelected(crime.id)
                 true
             }
             R.id.show_subtitle -> {
                 subtitleVisible = !subtitleVisible
                 activity?.invalidateOptionsMenu()
+                updateSubtitle(adapter.itemCount)
                 true
             }
             else -> {
@@ -120,15 +119,24 @@ class CrimeListFragment : Fragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        Log.d(TAG, "------ onSaveInstanceState")
         super.onSaveInstanceState(outState)
         outState.putBoolean(SAVE_SUBTITLE_VISIBLE, subtitleVisible)
     }
 
-    private fun updateUI(crimes: List<Crime>) {
-
-        adapter = CrimeAdapter(crimes)
-        crimeRecyclerView.adapter = adapter
-
+    fun updateUI() {
+        Log.d(TAG, "------ updateUI")
+        crimeListViewModel.crimeListLiveData.observe(
+            viewLifecycleOwner,
+            { crimes ->
+                crimes?.let {
+                    Log.d(TAG, "Got crimes ${crimes.size}")
+                    adapter.crimes = crimes
+                    adapter.notifyDataSetChanged()
+                    updateSubtitle(crimes.size)
+                }
+            }
+        )
     }
 
     private inner class CrimeHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
@@ -176,6 +184,7 @@ class CrimeListFragment : Fragment() {
     }
 
     override fun onDetach() {
+        Log.d(TAG, "------ onDetach")
         super.onDetach()
         callbacks = null
     }

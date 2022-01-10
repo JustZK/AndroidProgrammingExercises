@@ -12,6 +12,7 @@ import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,11 +50,14 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
     }
 
     override fun onAttach(context: Context) {
+        Log.d(TAG, "------ onAttach")
         super.onAttach(context)
         callbacks = context as Callbacks
     }
 
     companion object {
+        private const val TAG = "CrimeFragment"
+
         private const val ARG_CRIME_ID = "crime_id"
         private const val DIALOG_DATE = "DialogDate"
 
@@ -69,6 +73,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "------ onCreate")
         super.onCreate(savedInstanceState)
         val uuid = arguments?.getSerializable(ARG_CRIME_ID) as UUID
         crimeDetailViewModel.loadCrime(uuid)
@@ -79,6 +84,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d(TAG, "------ onCreateView")
         val v = inflater.inflate(R.layout.fragment_crime, container, false)
 
         titleField = v.findViewById(R.id.crime_title)
@@ -95,7 +101,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Log.d(TAG, "------ onViewCreated")
         crimeDetailViewModel.crimeLiveData.observe(
             viewLifecycleOwner, {
                 it?.let {
@@ -113,6 +119,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
     }
 
     override fun onStart() {
+        Log.d(TAG, "------ onStart")
         super.onStart()
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -201,11 +208,13 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
     }
 
     override fun onStop() {
+        Log.d(TAG, "------ onStop")
         super.onStop()
         crimeDetailViewModel.saveCrime(crime)
     }
 
     private fun updateUI() {
+        Log.d(TAG, "------ updateUI")
         titleField.setText(crime.title)
         dateButton.text = crime.date.toLocaleString()
         solvedCheckBox.apply {
@@ -231,6 +240,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(TAG, "------ onActivityResult")
         when {
             resultCode != Activity.RESULT_OK -> return
             requestCode == REQUEST_CONTACT && data != null -> {
@@ -281,6 +291,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
     }
 
     override fun onDetach() {
+        Log.d(TAG, "------ onDetach")
         super.onDetach()
         callbacks = null
         requireActivity().revokeUriPermission(photoUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)

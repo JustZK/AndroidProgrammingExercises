@@ -1,6 +1,6 @@
 package com.zk.criminalintent.activity
 
-import android.os.Bundle
+import android.util.Log
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import com.zk.criminalintent.R
@@ -22,6 +22,8 @@ class MainActivity : SingleFragmentActivity(), CrimeListFragment.Callbacks, Crim
 
     override fun onCrimeSelected(crimeId: UUID) {
         if (findViewById<FrameLayout>(R.id.detail_fragment_container) == null){
+            //小屏幕，替换显示
+
             val newDetail = CrimeFragment.newInstance(crimeId)
 
             supportFragmentManager
@@ -29,7 +31,10 @@ class MainActivity : SingleFragmentActivity(), CrimeListFragment.Callbacks, Crim
                 .replace(R.id.fragment_container, newDetail)
                 .addToBackStack(null)
                 .commit()
+
         } else {
+            //大屏幕，直接在右边显示
+
             val newDetail = CrimeFragment.newInstance(crimeId)
 
             supportFragmentManager
@@ -40,7 +45,8 @@ class MainActivity : SingleFragmentActivity(), CrimeListFragment.Callbacks, Crim
     }
 
     override fun onCrimeUpdated(crime: Crime) {
-//        val listFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as CrimeListFragment
-//        listFragment.updateUI()
+        Log.d("MainActivity", "------ onCrimeUpdated")
+        val listFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as CrimeListFragment
+        listFragment.updateUI()
     }
 }
